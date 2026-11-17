@@ -1,0 +1,312 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MARKOV // Text Generator</title>
+<style>
+:root{color-scheme:dark;--bg:#0b0d11;--panel:#131720;--panel2:#191f2a;--line:#2b3442;--muted:#8e9aab;--text:#edf2f8;--accent:#a8f06a;--blue:#83b7ff;--danger:#ff8585}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 20% 0%,#17202c 0,transparent 40%),var(--bg);color:var(--text);font:14px/1.5 Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,sans-serif}
+header{max-width:1320px;margin:auto;padding:28px 24px 18px;display:flex;justify-content:space-between;align-items:center;gap:20px;border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:12px}.mark{width:38px;height:38px;border-radius:11px;background:var(--accent);color:#10150b;display:grid;place-items:center;font-weight:950;font-size:20px}.eyebrow{font-size:10px;letter-spacing:.2em;color:var(--muted);font-weight:800}.brand h1{font-size:19px;letter-spacing:.12em;margin:0}.status{font-size:11px;color:var(--accent);border:1px solid #405a31;border-radius:99px;padding:5px 10px;white-space:nowrap}
+main{max-width:1320px;margin:auto;padding:22px 24px 60px}.layout{display:grid;grid-template-columns:340px minmax(0,1fr);gap:18px;align-items:start}.panel{background:linear-gradient(180deg,#171d27,#11161e);border:1px solid var(--line);border-radius:15px;overflow:hidden}.panel-head{padding:15px 17px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}.panel-head h2{font-size:12px;letter-spacing:.13em;margin:0}.panel-body{padding:17px}.section{margin-bottom:18px}.section:last-child{margin-bottom:0}.section-title{font-size:10px;letter-spacing:.15em;color:var(--muted);font-weight:800;margin:0 0 10px}
+.drop{border:1px dashed #526174;border-radius:11px;padding:19px 12px;text-align:center;background:#0f141c;transition:.2s}.drop.drag{border-color:var(--accent);background:#172116}.drop strong{display:block;margin:5px 0}.drop small{color:var(--muted)}input[type=file]{display:none}
+button,.file-button{border:1px solid var(--line);background:#202938;color:var(--text);border-radius:8px;padding:9px 12px;font:inherit;font-size:12px;font-weight:700;cursor:pointer;transition:.15s}button:hover,.file-button:hover{border-color:#71839a;background:#29364a}button.primary{background:var(--accent);border-color:var(--accent);color:#11170b}button.primary:hover{background:#bafa82}button:disabled{opacity:.4;cursor:not-allowed}.file-button{display:inline-block;margin-top:10px}
+.file-meta{font-size:11px;color:var(--muted);margin-top:10px;overflow-wrap:anywhere}.field{margin:13px 0}.field label{display:flex;justify-content:space-between;gap:12px;font-size:12px;margin-bottom:7px}.field output{color:var(--accent);font-variant-numeric:tabular-nums}input[type=range]{width:100%;accent-color:var(--accent)}select,input[type=number],input[type=text]{width:100%;background:#0d1219;border:1px solid var(--line);border-radius:8px;color:var(--text);padding:9px;font:inherit;font-size:12px}
+.toggle-row{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:9px 0;border-bottom:1px solid #252d39;font-size:12px}.toggle-row:last-child{border:0}.switch{appearance:none;width:34px;height:19px;border-radius:99px;background:#394454;position:relative;cursor:pointer;flex:none;transition:.2s}.switch:before{content:"";position:absolute;width:13px;height:13px;left:3px;top:3px;border-radius:50%;background:white;transition:.2s}.switch:checked{background:#83c84c}.switch:checked:before{transform:translateX(15px);background:#10170c}
+.actions{display:flex;gap:8px;flex-wrap:wrap}.actions button{flex:1}.hint{font-size:11px;color:var(--muted);margin-top:9px}
+.right{display:grid;gap:18px}.hero{padding:20px 21px;background:linear-gradient(120deg,#1a2631,#151b25 60%,#19211a);border:1px solid var(--line);border-radius:15px}.hero .eyebrow{color:var(--accent)}.hero h2{font-size:25px;line-height:1.2;margin:7px 0}.hero p{margin:0;color:#aab5c3;font-size:12px;max-width:680px}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.stat{background:#111720;border:1px solid var(--line);border-radius:11px;padding:12px}.stat strong{font-size:21px;display:block;font-variant-numeric:tabular-nums}.stat span{font-size:10px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase}
+.output-top{display:flex;align-items:center;justify-content:space-between;gap:12px}.output-top h2{margin:0;font-size:12px;letter-spacing:.13em}.output{min-height:190px;padding:18px;background:#0d1219;border:1px solid #283343;border-radius:10px;white-space:pre-wrap;font-size:14px;line-height:1.85}.output .placeholder{color:#778496}.sentence{padding:7px 0;border-bottom:1px solid #202a37}.sentence:last-child{border:0}.sentence-num{color:#65758a;font-size:10px;margin-right:9px}.output-tools{display:flex;gap:8px;flex-wrap:wrap}
+.tabs{display:flex;gap:6px;border-bottom:1px solid var(--line);padding:0 17px}.tab{background:none;border:0;border-radius:0;padding:12px 10px;color:var(--muted);border-bottom:2px solid transparent}.tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+.tab-content{padding:17px}.chips{display:flex;gap:6px;flex-wrap:wrap}.chip{font-size:11px;padding:5px 8px;border:1px solid #344154;background:#18212d;border-radius:6px;color:#c6d2e1}.mini-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.mini-card{background:#101720;border:1px solid var(--line);border-radius:9px;padding:11px}.mini-card b{display:block;font-size:17px}.mini-card span{color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.08em}
+table{border-collapse:collapse;width:100%;font-size:11px}td,th{text-align:left;padding:8px;border-bottom:1px solid #28313d}th{color:var(--muted);font-weight:700}td:last-child,th:last-child{text-align:right}.bar{height:5px;background:#273242;border-radius:9px;overflow:hidden;margin-top:5px}.bar i{display:block;height:100%;background:var(--accent)}
+.notice{padding:10px 12px;background:#1b2118;border:1px solid #394c2d;color:#c8e9ad;border-radius:8px;font-size:11px;margin-top:12px}.warning{background:#241c16;border-color:#59442c;color:#e8c49b}
+footer{max-width:1320px;margin:0 auto;padding:0 24px 25px;color:#657184;font-size:10px}
+@media(max-width:900px){.layout{grid-template-columns:1fr}.stats{grid-template-columns:repeat(2,1fr)}}@media(max-width:520px){header{padding:20px 15px}main{padding:15px}.stats{gap:7px}.stat{padding:9px}.hero h2{font-size:21px}.output-top{align-items:flex-start;flex-direction:column}}
+</style>
+</head>
+<body>
+<header>
+ <div class="brand"><div class="mark">M</div><div><div class="eyebrow">LINGUISTIC PATTERN ENGINE</div><h1>MARKOV / TEXT GENERATOR</h1></div></div>
+ <div class="status" id="status">● WAITING FOR CORPUS</div>
+</header>
+<main>
+ <div class="layout">
+  <aside class="panel">
+   <div class="panel-head"><h2>01 / CORPUS INPUT</h2><span class="eyebrow">LOCAL ONLY</span></div>
+   <div class="panel-body">
+    <div class="section">
+     <p class="section-title">UPLOAD SOURCE TEXT</p>
+     <div class="drop" id="drop">
+      <div style="font-size:24px">⇧</div><strong>Drop a .txt file here</strong><small>or choose a file from your device</small>
+      <label class="file-button" for="file">Browse files</label><input id="file" type="file" accept=".txt,text/plain">
+     </div>
+     <div class="file-meta" id="fileMeta">No file loaded. Your text stays in this browser session.</div>
+     <div class="actions" style="margin-top:10px"><button id="loadSample">Load built-in demo</button><button id="clearCorpus">Clear</button></div>
+    </div>
+    <div class="section">
+     <p class="section-title">02 / GENERATION PARAMETERS</p>
+     <div class="field"><label for="order">Markov order <output id="orderVal">2</output></label><input id="order" type="range" min="1" max="5" value="2"></div>
+     <div class="field"><label for="count">Number of lines <output id="countVal">12</output></label><input id="count" type="range" min="1" max="40" value="12"></div>
+     <div class="field"><label for="minWords">Minimum words <output id="minVal">5</output></label><input id="minWords" type="range" min="2" max="20" value="5"></div>
+     <div class="field"><label for="maxWords">Maximum words <output id="maxVal">18</output></label><input id="maxWords" type="range" min="5" max="40" value="18"></div>
+     <div class="field"><label for="randomness">Randomness <output id="randomVal">55%</output></label><input id="randomness" type="range" min="0" max="100" value="55"></div>
+     <div class="field"><label for="repeat">Phrase repetition <output id="repeatVal">45%</output></label><input id="repeat" type="range" min="0" max="100" value="45"></div>
+     <div class="field"><label for="rhymeScheme">Rhyme scheme</label><select id="rhymeScheme"><option value="none">No rhyme</option><option value="couplets">AABB couplets</option><option value="alternate">ABAB alternating</option><option value="all">AAAA same ending</option><option value="loose">Loose rhyme pairs</option></select></div>
+    </div>
+    <div class="section">
+     <p class="section-title">03 / ENGINE OPTIONS</p>
+     <div class="toggle-row"><span>Preserve source grammar</span><input class="switch" id="grammar" type="checkbox" checked></div>
+     <div class="toggle-row"><span>Recognize repeated phrases</span><input class="switch" id="phrases" type="checkbox" checked></div>
+     <div class="toggle-row"><span>Generate ad-libs from (parentheses)</span><input class="switch" id="adlibs" type="checkbox" checked></div>
+     <div class="toggle-row"><span>Use corpus vocabulary only</span><input class="switch" id="corpusOnly" type="checkbox" checked></div>
+     <div class="toggle-row"><span>Avoid exact duplicate lines</span><input class="switch" id="unique" type="checkbox" checked></div>
+     <div class="toggle-row"><span>Keep source punctuation</span><input class="switch" id="punctuation" type="checkbox" checked></div>
+     <div class="toggle-row"><span>Prefer learned conjugations</span><input class="switch" id="conjugations" type="checkbox" checked></div>
+    </div>
+    <div class="actions"><button class="primary" id="generate" disabled>GENERATE LINES ↗</button></div>
+    <p class="hint">Runs entirely in your browser. No upload or server processing.</p>
+   </div>
+  </aside>
+  <section class="right">
+   <div class="hero"><div class="eyebrow">CORPUS-BASED LANGUAGE SYNTHESIS</div><h2>Learn the patterns.<br>Generate new combinations.</h2><p>Builds word transitions, recurring phrase units, grammatical tendencies, ad-lib vocabulary and approximate rhyme groups from your own text.</p></div>
+   <div class="stats">
+    <div class="stat"><strong id="statWords">0</strong><span>Total words</span></div>
+    <div class="stat"><strong id="statUnique">0</strong><span>Unique words</span></div>
+    <div class="stat"><strong id="statLines">0</strong><span>Source lines</span></div>
+    <div class="stat"><strong id="statPhrases">0</strong><span>Repeated phrases</span></div>
+   </div>
+   <div class="panel">
+    <div class="panel-head output-top"><h2>04 / GENERATED OUTPUT</h2><div class="output-tools"><button id="copy" disabled>Copy output</button><button id="download" disabled>Export .txt</button></div></div>
+    <div class="panel-body"><div class="output" id="output"><span class="placeholder">Upload a text file or load the demo corpus, then generate to see results here.</span></div><div class="hint" id="generationMeta">No generation run yet.</div></div>
+   </div>
+   <div class="panel">
+    <div class="tabs"><button class="tab active" data-tab="profile">Corpus profile</button><button class="tab" data-tab="grammarTab">Grammar patterns</button><button class="tab" data-tab="transitions">Transitions</button></div>
+    <div class="tab-content" id="tabContent"><div class="placeholder">Corpus analysis will appear here.</div></div>
+   </div>
+  </section>
+ </div>
+</main>
+<footer>MARKOV TEXT GENERATOR · Heuristic language analysis · Rhyme matching is approximate and depends on the source vocabulary.</footer>
+<script>
+(() => {
+"use strict";
+const $ = id => document.getElementById(id);
+const state = {text:"",name:"",lines:[],tokens:[],model:new Map(),phrases:[],adlibs:[],wordCounts:new Map(),posCounts:new Map(),patterns:new Map(),lastOutput:[],profile:null};
+const demo = `I woke up late and stepped into the night
+The city kept moving underneath the light
+I got a new idea and I carried it away
+Everybody talking but I got nothing to say
+Going back again, going back again, yeah
+I put the old plans in a box and let them fade
+I been running through the hours, I been making my way
+All of my people keep moving at their own pace
+Yeah, I saw the skyline and I watched it glow
+I got a long road and a long way to go
+The sound came back, the sound came back (yeah)
+We kept it moving and we never moved slow
+I just made a promise that I meant to keep
+The room got quiet and the city fell asleep
+What do you know, what do you know?
+I found another road and I followed where it goes`;
+const stop = new Set(["the","a","an","and","or","but","if","then","than","to","of","in","on","at","for","with","from","by","as","is","am","are","was","were","be","been","being","it","this","that","these","those","i","you","he","she","we","they","me","him","her","us","them","my","your","our","their","his","its","who","what","when","where","why","how"]);
+const irregularPast = new Set(["went","got","had","made","said","saw","came","ran","took","gave","knew","thought","bought","brought","left","felt","kept","woke","wrote","spoke","drove","found","lost","slept","stood","put","hit","read","held","heard","built","sent","spent","won","done","been"]);
+const irregularBase = new Set(["go","get","have","make","say","see","come","run","take","give","know","think","buy","bring","leave","feel","keep","wake","write","speak","drive","find","lose","sleep","stand","put","hit","read","hold","hear","build","send","spend","win","do"]);
+const irregularMap = {went:"go",got:"get",had:"have",made:"make",said:"say",saw:"see",came:"come",ran:"run",took:"take",gave:"give",knew:"know",thought:"think",bought:"buy",brought:"bring",left:"leave",felt:"feel",kept:"keep",woke:"wake",wrote:"write",spoke:"speak",drove:"drive",found:"find",lost:"lose",slept:"sleep",stood:"stand",put:"put",hit:"hit",read:"read",held:"hold",heard:"hear",built:"build",sent:"send",spent:"spend",won:"win",done:"do"};
+const clean = s => s.toLowerCase().replace(/^[^a-z0-9']+|[^a-z0-9']+$/g,"");
+const words = s => s.match(/[A-Za-z0-9]+(?:['’][A-Za-z]+)?|[.,!?;:—-]+|\([^)]*\)/g)||[];
+function splitLines(text){return text.split(/\r?\n/).map(x=>x.trim()).filter(Boolean)}
+function pos(word){
+ const w=clean(word); if(!w)return "punctuation";
+ if(/^\(.+\)$/.test(word))return "adlib";
+ if(["i","you","he","she","we","they","it","me","him","her","us","them","my","your","our","their","this","that"].includes(w))return "pronoun";
+ if(["a","an","the"].includes(w))return "article";
+ if(["and","or","but","if","because","while","when","that"].includes(w))return "conjunction";
+ if(["in","on","at","to","for","with","from","by","of","into","through","over","under","back"].includes(w))return "preposition";
+ if(["yeah","uh","oh","ayy","hmm","mmm","woo","brrt"].includes(w))return "interjection";
+ if(["finna","gon","gonna","wanna","gotta"].includes(w))return "modal/slang";
+ if(irregularPast.has(w)||/(ed|ing)$/.test(w)||["go","get","have","make","say","see","come","run","take","give","know","think","do","is","are","was","were","am","be","been","being","put","hit"].includes(w))return "verb";
+ if(/ly$/.test(w))return "adverb";
+ if(/(ous|ful|less|able|ible|ive|al|ic|ish)$/.test(w))return "adjective";
+ if(/s$/.test(w)&&w.length>3)return "noun / plural";
+ return "noun / unknown";
+}
+function verbForm(w){
+ const x=clean(w);
+ if(irregularPast.has(x))return {base:irregularMap[x]||x,form:"past / participle"};
+ if(/ing$/.test(x))return {base:x.replace(/ing$/,""),form:"present participle"};
+ if(/ed$/.test(x))return {base:x.replace(/ed$/,""),form:"past / participle"};
+ if(/s$/.test(x)&&x.length>3)return {base:x.slice(0,-1),form:"third-person singular"};
+ if(["am","is","are","was","were","be","been","being"].includes(x))return {base:"be",form:"be-conjugation"};
+ if(["go","get","have","make","say","see","come","run","take","give","know","think","do","put","hit"].includes(x))return {base:x,form:"base"};
+ return null;
+}
+function tokenizeLine(line){return words(line).filter(Boolean)}
+function analyze(text,name="Untitled corpus"){
+ state.text=text;state.name=name;state.lines=splitLines(text);state.tokens=[];state.model=new Map();state.wordCounts=new Map();state.posCounts=new Map();state.patterns=new Map();state.adlibs=[];state.phrases=[];
+ const tokenLines=state.lines.map(tokenizeLine);
+ tokenLines.forEach(ts=>{
+   const main=ts.filter(t=>!(/^\(.+\)$/.test(t)));
+   main.forEach((t,i)=>{
+     const w=clean(t);if(!w)return;
+     state.tokens.push(t);state.wordCounts.set(w,(state.wordCounts.get(w)||0)+1);
+     const p=pos(t);state.posCounts.set(p,(state.posCounts.get(p)||0)+1);
+     const vf=verbForm(t);if(vf){const key=vf.base+" · "+vf.form;state.patterns.set(key,(state.patterns.get(key)||0)+1)}
+   });
+   ts.filter(t=>/^\(.+\)$/.test(t)).forEach(t=>state.adlibs.push(t.slice(1,-1)));
+   const normalized=main.map(clean).filter(Boolean).join(" ");
+   const n=normalized.split(/\s+/);
+   for(let size=2;size<=5;size++)for(let i=0;i<=n.length-size;i++){
+     const phrase=n.slice(i,i+size).join(" ");
+     if(phrase.length>5)state.phrases.push(phrase);
+   }
+   const seq=ts.filter(t=>!(/^\(.+\)$/.test(t)));
+   for(let i=0;i<seq.length;i++){
+     const token=seq[i],key=clean(token);if(!key)continue;
+     for(let order=1;order<=5;order++){
+       if(i<order)continue;
+       const ctx=seq.slice(i-order,i).map(clean).join(" ");
+       if(!ctx)continue;
+       if(!state.model.has(ctx))state.model.set(ctx,[]);
+       state.model.get(ctx).push(token);
+     }
+   }
+ });
+ const phraseFreq=new Map();state.phrases.forEach(p=>phraseFreq.set(p,(phraseFreq.get(p)||0)+1));
+ state.phrases=[...phraseFreq].filter(([p,c])=>c>=2).sort((a,b)=>b[1]-a[1]).slice(0,40).map(([phrase,count])=>({phrase,count}));
+ state.profile={tokenLines,phraseFreq};
+ renderStats();renderTabs("profile");$("generate").disabled=!state.tokens.length;$("status").textContent="● CORPUS ANALYZED";$("status").style.color="var(--accent)";
+ $("fileMeta").textContent=`${name} · ${state.lines.length} non-empty lines · ${state.tokens.length} word tokens`;
+}
+function renderStats(){
+ $("statWords").textContent=state.tokens.length.toLocaleString();$("statUnique").textContent=state.wordCounts.size.toLocaleString();$("statLines").textContent=state.lines.length.toLocaleString();$("statPhrases").textContent=state.phrases.length.toLocaleString();
+}
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+function renderTabs(tab){
+ document.querySelectorAll(".tab").forEach(b=>b.classList.toggle("active",b.dataset.tab===tab));
+ const el=$("tabContent");
+ if(tab==="profile"){
+  const top=[...state.wordCounts].sort((a,b)=>b[1]-a[1]).slice(0,18);
+  const posRows=[...state.posCounts].sort((a,b)=>b[1]-a[1]);
+  el.innerHTML=`<div class="mini-grid"><div class="mini-card"><b>${state.tokens.length.toLocaleString()}</b><span>Word tokens</span></div><div class="mini-card"><b>${state.wordCounts.size.toLocaleString()}</b><span>Unique vocabulary</span></div><div class="mini-card"><b>${state.adlibs.length}</b><span>Parenthetical ad-libs</span></div><div class="mini-card"><b>${state.model.size.toLocaleString()}</b><span>Learned contexts</span></div></div><p class="section-title" style="margin-top:18px">MOST FREQUENT WORDS</p><div class="chips">${top.map(([w,c])=>`<span class="chip">${esc(w)} <b>${c}</b></span>`).join("")||"No words detected"}</div><p class="section-title" style="margin-top:18px">HEURISTIC WORD CLASSES</p>${posRows.map(([p,c])=>`<div style="margin:10px 0"><div style="display:flex;justify-content:space-between;font-size:11px"><span>${esc(p)}</span><span>${c}</span></div><div class="bar"><i style="width:${100*c/Math.max(1,state.tokens.length)}%"></i></div></div>`).join("")}`;
+ } else if(tab==="grammarTab"){
+  const rows=[...state.patterns].sort((a,b)=>b[1]-a[1]).slice(0,30);
+  el.innerHTML=`<p class="hint" style="margin:0 0 12px">Verb forms are identified with lightweight rules and an irregular-verb list. This is heuristic tagging, not a full linguistic parser. The engine preserves source constructions rather than rewriting them into formal grammar.</p><table><thead><tr><th>Detected verb base</th><th>Observed form</th><th>Count</th></tr></thead><tbody>${rows.map(([k,c])=>{const [base,form]=k.split(" · ");return `<tr><td>${esc(base)}</td><td>${esc(form)}</td><td>${c}</td></tr>`}).join("")||"<tr><td colspan='3'>No verb forms identified</td></tr>"}</tbody></table>`;
+ } else {
+  const order=Number($("order").value),rows=[...state.model].filter(([k])=>k.split(" ").length===order).sort((a,b)=>b[1].length-a[1].length).slice(0,24);
+  el.innerHTML=`<p class="hint" style="margin:0 0 12px">These are the most common ${order}-word contexts and the number of observed next-word choices.</p><table><thead><tr><th>Context</th><th>Possible next words</th><th>Choices</th></tr></thead><tbody>${rows.map(([k,v])=>`<tr><td>${esc(k)}</td><td>${v.slice(0,5).map(esc).join(", ")}${v.length>5?"…":""}</td><td>${v.length}</td></tr>`).join("")||"<tr><td colspan='3'>No contexts at this order</td></tr>"}</tbody></table>`;
+ }
+}
+function weightedChoice(items,randomness){
+ if(!items.length)return null;
+ const counts=new Map();items.forEach(x=>counts.set(x,(counts.get(x)||0)+1));
+ const unique=[...counts.keys()];
+ if(randomness===0)return unique.sort((a,b)=>counts.get(b)-counts.get(a))[0];
+ const temperature=.25+(randomness/100)*1.8;
+ const weights=unique.map(x=>Math.pow(counts.get(x),1/temperature));
+ let r=Math.random()*weights.reduce((a,b)=>a+b,0);
+ for(let i=0;i<unique.length;i++){r-=weights[i];if(r<=0)return unique[i]}
+ return unique[unique.length-1];
+}
+function pickNext(seq,order,randomness){
+ for(let n=order;n>=1;n--){
+  const ctx=seq.slice(-n).map(clean).join(" ");
+  const choices=state.model.get(ctx);if(choices&&choices.length)return weightedChoice(choices,randomness);
+ }
+ const all=state.tokens.filter(t=>clean(t));return weightedChoice(all,randomness);
+}
+function starts(){
+ const lines=state.profile.tokenLines.filter(x=>x.length);
+ return lines.map(x=>x[0]).filter(Boolean);
+}
+function makeLine(targetEnd=null,used=new Set()){
+ const order=Number($("order").value),min=Number($("minWords").value),max=Math.max(min,Number($("maxWords").value)),randomness=Number($("randomness").value),repeat=Number($("repeat").value);
+ const source=state.profile.tokenLines;
+ let seed;
+ if(Math.random()*100<repeat&&state.phrases.length){
+   const phrase=weightedChoice(state.phrases.map(p=>p.phrase),randomness);
+   seed=phrase.split(" ").map((w,i)=>i===0?w[0].toUpperCase()+w.slice(1):w);
+ }else{
+   seed=[weightedChoice(starts(),randomness)||state.tokens[0]];
+ }
+ let seq=seed.slice();
+ const maxAttempts=max+8;
+ for(let i=0;i<maxAttempts;i++){
+  const current=seq.map(clean).join(" ");
+  if(seq.length>=min&&/[.!?]$/.test(seq[seq.length-1]))break;
+  const next=pickNext(seq,order,randomness);
+  if(!next)break;
+  seq.push(next);
+  if(seq.length>=max&&Math.random()<.8)break;
+ }
+ let line=seq.slice(0,max+1).join(" ").replace(/\s+([,.;!?])/g,"$1");
+ if($("grammar").checked)line=lightGrammar(line);
+ if($("punctuation").checked){
+   if(!/[.!?]$/.test(line))line+=Math.random()<.55?".":"!";
+ }else line=line.replace(/[.!?]+$/,"");
+ if(targetEnd){
+   const parts=line.split(/\s+/);if(parts.length)parts[parts.length-1]=targetEnd;line=parts.join(" ");
+   if($("punctuation").checked&&!/[.!?]$/.test(line))line+=".";
+ }
+ if($("adlibs").checked&&state.adlibs.length&&Math.random()<.38){
+   const ad=weightedChoice(state.adlibs,randomness);line=line.replace(/[.!?]?$/,` (${ad})$&`);
+ }
+ return line.charAt(0).toUpperCase()+line.slice(1);
+}
+function lightGrammar(line){
+ // Deliberately conservative: preserve colloquial forms and observed source grammar.
+ return line.replace(/\s+/g," ").replace(/\bi\b/g,"I").replace(/\bi'm\b/gi,"I'm").replace(/\bi've\b/gi,"I've");
+}
+function rhymeKey(word){
+ let w=clean(word).replace(/[^a-z]/g,"");
+ if(w.length<2)return w;
+ // Approximate rhyme key: last stressed-vowel-like group plus following consonants.
+ const m=w.match(/[aeiouy][^aeiouy]*$/);
+ return m?m[0]:w.slice(-2);
+}
+function lastWord(line){const a=(line.toLowerCase().match(/[a-z0-9']+/g)||[]);return a[a.length-1]||""}
+function rhymeCandidate(line,usedKeys){
+ const candidates=[...state.wordCounts.keys()].filter(w=>w.length>2&&!stop.has(w)&&!usedKeys.has(rhymeKey(w)));
+ const end=lastWord(line),key=rhymeKey(end);
+ const matches=candidates.filter(w=>rhymeKey(w)===key&&w!==end);
+ return matches.length?weightedChoice(matches,55):null;
+}
+function generate(){
+ if(!state.tokens.length)return;
+ const count=Number($("count").value),scheme=$("rhymeScheme").value,used=new Set(),result=[];
+ for(let i=0;i<count;i++){
+  let line=makeLine();
+  if(scheme!=="none"&&i%2===1){
+    const ref=(scheme==="alternate"&&i>=2)?result[i-2]:result[i-1];
+    const target=ref?rhymeCandidate(ref,used):null;
+    if(target){line=makeLine(target,used);used.add(rhymeKey(target))}
+  }else if(scheme==="all"&&i>0){
+    const target=rhymeCandidate(result[0],used);if(target){line=makeLine(target,used);used.add(rhymeKey(target))}
+  }
+  if($("unique").checked&&result.includes(line)){
+    for(let j=0;j<4&&result.includes(line);j++)line=makeLine();
+  }
+  result.push(line);
+ }
+ state.lastOutput=result;
+ $("output").innerHTML=result.map((s,i)=>`<div class="sentence"><span class="sentence-num">${String(i+1).padStart(2,"0")}</span>${esc(s)}</div>`).join("");
+ $("copy").disabled=false;$("download").disabled=false;
+ $("generationMeta").textContent=`${result.length} lines generated · order ${$("order").value} · ${scheme==="none"?"rhyme off":scheme+" rhyme"} · local browser generation`;
+}
+$("file").addEventListener("change",async e=>{const f=e.target.files[0];if(!f)return;analyze(await f.text(),f.name)});
+$("drop").addEventListener("dragover",e=>{e.preventDefault();$("drop").classList.add("drag")});
+$("drop").addEventListener("dragleave",()=> $("drop").classList.remove("drag"));
+$("drop").addEventListener("drop",async e=>{e.preventDefault();$("drop").classList.remove("drag");const f=e.dataTransfer.files[0];if(f&&(/\.txt$/i.test(f.name)||f.type==="text/plain"))analyze(await f.text(),f.name)});
+$("loadSample").addEventListener("click",()=>analyze(demo,"Built-in demo corpus"));
+$("clearCorpus").addEventListener("click",()=>{state.text="";state.tokens=[];state.lines=[];state.model.clear();state.wordCounts.clear();state.patterns.clear();state.phrases=[];state.adlibs=[];state.profile=null;$("generate").disabled=true;$("status").textContent="● WAITING FOR CORPUS";$("status").style.color="var(--muted)";$("fileMeta").textContent="No file loaded.";renderStats();$("output").innerHTML='<span class="placeholder">Corpus cleared. Load a text file to begin.</span>';$("copy").disabled=true;$("download").disabled=true;$("tabContent").innerHTML='<div class="placeholder">Corpus analysis will appear here.</div>'});
+$("generate").addEventListener("click",generate);
+$("copy").addEventListener("click",async()=>{try{await navigator.clipboard.writeText(state.lastOutput.join("\n"));$("copy").textContent="Copied";setTimeout(()=>$("copy").textContent="Copy output",1300)}catch(e){$("copy").textContent="Clipboard unavailable"}});
+$("download").addEventListener("click",()=>{const blob=new Blob([state.lastOutput.join("\n")],{type:"text/plain"});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="markov-output.txt";a.click();URL.revokeObjectURL(a.href)});
+document.querySelectorAll(".tab").forEach(b=>b.addEventListener("click",()=>renderTabs(b.dataset.tab)));
+const ranges=[["order","orderVal",v=>v],["count","countVal",v=>v],["minWords","minVal",v=>v],["maxWords","maxVal",v=>v],["randomness","randomVal",v=>v+"%"],["repeat","repeatVal",v=>v+"%"]];
+ranges.forEach(([id,out,fmt])=>$(id).addEventListener("input",()=>{$(out).textContent=fmt($(id).value);if(id==="order"&&document.querySelector(".tab.active")?.dataset.tab==="transitions")renderTabs("transitions")}));
+})();
+</script>
+</body>
+</html>
